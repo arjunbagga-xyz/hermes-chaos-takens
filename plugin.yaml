@@ -1,0 +1,56 @@
+manifest_version: 2
+name: chaos-takens
+version: 0.1.0
+description: Nonlinear dynamical phase-space reconstructor using Takens' Delay-Embedding
+  Theorem, Rosenstein Largest Lyapunov Exponent (lambda_1), and Sugihara Convergent
+  Cross Mapping (CCM) causality.
+author: Arjun Bagga <arjunbagga-xyz>
+license: MIT
+homepage: https://github.com/arjunbagga-xyz/hermes-chaos-takens
+repository: https://github.com/arjunbagga-xyz/hermes-chaos-takens
+min_hermes_version: 0.5.0
+max_hermes_version: 1.99.0
+categories:
+- dynamical-systems
+- causality
+- time-series
+- physics
+tags:
+- takens-theorem
+- strange-attractor
+- lyapunov-exponent
+- convergent-cross-mapping
+- chaos-theory
+requires_env: []
+optional_env: []
+python_dependencies:
+- numpy>=1.26,<3.0
+- scipy>=1.11,<2.0
+- pydantic>=2.5,<3.0
+- fastapi>=0.109,<1.0
+provides_tools:
+- chaos_takens_reconstruct
+- chaos_takens_ccm_causality
+provides_hooks:
+- pre_llm_call
+- post_llm_call
+config_schema:
+  default_embedding_dim:
+    type: integer
+    default: 3
+    description: Default Takens delay-embedding dimension m > 2*d_A.
+  theiler_window:
+    type: integer
+    default: 5
+    description: Temporal exclusion window W for Rosenstein nearest-neighbor Lyapunov
+      divergence.
+web:
+  enabled: true
+  mount_path: /chaos-takens
+desktop:
+  enabled: true
+  entry: desktop/plugin.js
+  surfaces:
+  - transcript
+  - sidebar
+  - statusbar
