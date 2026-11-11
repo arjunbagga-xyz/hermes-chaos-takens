@@ -39,8 +39,17 @@ def pre_llm_call_hook(
     if not any(k in user_text for k in ("forecast", "predict", "time series", "timeseries", "latency", "jitter", "causal", "correlation", ".csv", "stability", "nic")):
         return payload_dict if payload_dict is not None else None
 
-    rec_raw = handle_takens_reconstruct({})
-    ccm_raw = handle_takens_ccm_causality({})
+    # Only analyze a real, caller-supplied series. Never fabricate synthetic defaults.
+    series = None
+    if payload_dict is not None:
+        series = payload_dict.get("series") or payload_dict.get("chaos_takens_series")
+    if series is None:
+        series = kwargs.get("series")
+    if not series:
+        return payload_dict if payload_dict is not None else None
+
+    rec_raw = handle_takens_reconstruct({"series": series})
+    ccm_raw = handle_takens_ccm_causality({"series_x": series, "series_y": series})
     rec = json.loads(rec_raw) if isinstance(rec_raw, str) else rec_raw
     ccm = json.loads(ccm_raw) if isinstance(ccm_raw, str) else ccm_raw
 
@@ -70,12 +79,20 @@ def post_llm_call_hook(
     return None
 
 
+def _reconstruct_tool(args, **kwargs):
+    return json.dumps(handle_takens_reconstruct(args, **kwargs))
+
+
+def _ccm_tool(args, **kwargs):
+    return json.dumps(handle_takens_ccm_causality(args, **kwargs))
+
+
 def register(ctx) -> None:
     ctx.register_tool(
         name="chaos_takens_reconstruct",
         toolset="chaos_takens",
         schema=TAKENS_RECONSTRUCT_SCHEMA,
-        handler=handle_takens_reconstruct,
+        handler=_reconstruct_tool,
         is_async=False,
         emoji="🌀",
     )
@@ -83,7 +100,7 @@ def register(ctx) -> None:
         name="chaos_takens_ccm_causality",
         toolset="chaos_takens",
         schema=TAKENS_CCM_SCHEMA,
-        handler=handle_takens_ccm_causality,
+        handler=_ccm_tool,
         is_async=False,
         emoji="🔗",
     )

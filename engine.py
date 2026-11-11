@@ -117,12 +117,10 @@ def handle_takens_reconstruct(args: Dict[str, Any], **kwargs: Any) -> Dict[str, 
     """
     raw_series = args.get("series")
     if not raw_series:
-        # Default: Chaotic logistic map r=3.99 trajectory if none provided
-        x_val = 0.21
-        raw_series = []
-        for _ in range(160):
-            x_val = 3.99 * x_val * (1.0 - x_val)
-            raw_series.append(x_val)
+        return {
+            "status": "error",
+            "error": "series is required — provide a real 1D time series. No synthetic defaults.",
+        }
 
     series = np.asarray(raw_series, dtype=float).ravel()
     m = int(args.get("embedding_dim", 3))
@@ -208,17 +206,13 @@ def handle_takens_ccm_causality(args: Dict[str, Any], **kwargs: Any) -> Dict[str
     y_raw = args.get("series_y")
 
     if not x_raw or not y_raw:
-        # Coupled nonlinear system where X drives Y unidirectionally (X -> Y), beta_yx > 0, beta_xy = 0
-        n_pts = 160
-        x_arr = np.zeros(n_pts)
-        y_arr = np.zeros(n_pts)
-        x_arr[0], y_arr[0] = 0.2, 0.4
-        for t in range(n_pts - 1):
-            x_arr[t + 1] = x_arr[t] * (3.8 - 3.8 * x_arr[t])
-            y_arr[t + 1] = y_arr[t] * (3.5 - 3.5 * y_arr[t] - 0.35 * x_arr[t])
-    else:
-        x_arr = np.asarray(x_raw, dtype=float).ravel()
-        y_arr = np.asarray(y_raw, dtype=float).ravel()
+        return {
+            "status": "error",
+            "error": "series_x and series_y are required — provide real time series. No synthetic defaults.",
+        }
+
+    x_arr = np.asarray(x_raw, dtype=float).ravel()
+    y_arr = np.asarray(y_raw, dtype=float).ravel()
 
     m = int(args.get("embedding_dim", 3))
     tau = int(args.get("tau", 1))
@@ -271,11 +265,12 @@ TAKENS_RECONSTRUCT_SCHEMA: Dict[str, Any] = {
             "series": {
                 "type": "array",
                 "items": {"type": "number"},
-                "description": "1D scalar time series observations.",
+                "description": "1D scalar time series observations (required)."
             },
             "embedding_dim": {"type": "integer", "description": "Embedding dimension m (default 3)."},
             "tau": {"type": "integer", "description": "Optional time delay tau (auto-selected via AMI if omitted)."},
         },
+        "required": ["series"]
     },
 }
 
@@ -288,11 +283,12 @@ TAKENS_CCM_SCHEMA: Dict[str, Any] = {
     "parameters": {
         "type": "object",
         "properties": {
-            "series_x": {"type": "array", "items": {"type": "number"}, "description": "Time series X."},
-            "series_y": {"type": "array", "items": {"type": "number"}, "description": "Time series Y."},
+            "series_x": {"type": "array", "items": {"type": "number"}, "description": "Time series X (required)."},
+            "series_y": {"type": "array", "items": {"type": "number"}, "description": "Time series Y (required)."},
             "embedding_dim": {"type": "integer", "description": "Embedding dimension m (default 3)."},
             "tau": {"type": "integer", "description": "Lag step tau (default 1)."},
         },
+        "required": ["series_x", "series_y"]
     },
 }
 

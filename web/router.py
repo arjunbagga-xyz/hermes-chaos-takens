@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from ..engine import LAST_TAKENS_CACHE, handle_takens_reconstruct
+from ..engine import LAST_TAKENS_CACHE
 
 router = APIRouter()
 
@@ -13,7 +13,11 @@ router = APIRouter()
 def get_takens_status() -> dict:
     latest = LAST_TAKENS_CACHE.get("latest")
     if not latest:
-        latest = handle_takens_reconstruct({})
+        return {
+            "plugin": "chaos-takens",
+            "status": "idle",
+            "message": "No reconstruction run yet. Use chaos_takens_reconstruct with a real series.",
+        }
     return {
         "plugin": "chaos-takens",
         "status": "active",
