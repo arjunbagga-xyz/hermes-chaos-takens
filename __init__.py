@@ -6,22 +6,13 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
-try:
-    from .engine import (
-        LAST_TAKENS_CACHE,
-        TAKENS_CCM_SCHEMA,
-        TAKENS_RECONSTRUCT_SCHEMA,
-        handle_takens_ccm_causality,
-        handle_takens_reconstruct,
-    )
-except (ImportError, ValueError):
-    from engine import (
-        LAST_TAKENS_CACHE,
-        TAKENS_CCM_SCHEMA,
-        TAKENS_RECONSTRUCT_SCHEMA,
-        handle_takens_ccm_causality,
-        handle_takens_reconstruct,
-    )
+from .engine import (
+    LAST_TAKENS_CACHE,
+    TAKENS_CCM_SCHEMA,
+    TAKENS_RECONSTRUCT_SCHEMA,
+    handle_takens_ccm_causality,
+    handle_takens_reconstruct,
+)
 
 
 def pre_llm_call_hook(
